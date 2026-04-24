@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      enquiries: {
+        Row: {
+          class_applied: string
+          created_at: string
+          id: string
+          message: string | null
+          mobile_number: string
+          name: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          class_applied: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          mobile_number: string
+          name: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          class_applied?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          mobile_number?: string
+          name?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notices: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          notice_date: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          notice_date?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          notice_date?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          mobile_number: string
+          name: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mobile_number: string
+          name: string
+          role: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mobile_number?: string
+          name?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
