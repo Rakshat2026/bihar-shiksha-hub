@@ -42,7 +42,7 @@ const Contact = () => {
 
   const items = [
     { icon: MapPin, label: t("address"), value: t("addressFull") },
-    { icon: Phone, label: t("phone"), value: "+91 98765 43210" },
+    { icon: Phone, label: t("phone"), value: "+91 99319 14858" },
     { icon: Mail, label: t("email"), value: "info@gyangangaacademy.in" },
     { icon: Clock, label: t("hours"), value: t("hoursVal") },
   ];

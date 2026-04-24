@@ -31,7 +31,7 @@ export function Footer() {
           <h3 className="font-semibold mb-3 text-secondary">{t("contactHeading")}</h3>
           <ul className="space-y-2 text-sm">
             <li className="flex gap-2"><MapPin className="h-4 w-4 mt-0.5 shrink-0" /><span>{t("addressFull")}</span></li>
-            <li className="flex gap-2"><Phone className="h-4 w-4 mt-0.5 shrink-0" /><span>+91 98765 43210</span></li>
+            <li className="flex gap-2"><Phone className="h-4 w-4 mt-0.5 shrink-0" /><span>+91 99319 14858</span></li>
             <li className="flex gap-2"><Mail className="h-4 w-4 mt-0.5 shrink-0" /><span>info@gyangangaacademy.in</span></li>
             <li className="flex gap-2"><Clock className="h-4 w-4 mt-0.5 shrink-0" /><span>{t("hoursVal")}</span></li>
           </ul>

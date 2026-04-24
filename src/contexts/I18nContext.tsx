@@ -48,8 +48,8 @@ export const dict: Dict = {
   },
   founder: { hi: "संस्थापक", en: "Founder" },
   founderText: {
-    hi: "स्व. शिक्षाविद् रमेश चंद्र मिश्र जी द्वारा स्थापित, जिनका दृष्टिकोण ग्रामीण भारत के बच्चों तक शिक्षा पहुँचाना था।",
-    en: "Founded by Late Shri Ramesh Chandra Mishra, an educationist whose vision was to bring education to every child in rural India.",
+    hi: "श्री हेमन्त कुमार झा जी द्वारा स्थापित, जिनका दृष्टिकोण ग्रामीण भारत के बच्चों तक शिक्षा पहुँचाना था।",
+    en: "Founded by Shri Hemant Kumar Jha, an educationist whose vision is to bring education to every child in rural India.",
   },
   principalMsg: { hi: "प्रधानाचार्य का संदेश", en: "Principal's Message" },
   principalText: {
