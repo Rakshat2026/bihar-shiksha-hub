@@ -79,9 +79,9 @@ const Admissions = () => {
             <h2 className="text-2xl font-bold text-primary mb-6">{t("enquiryForm")}</h2>
 
             {submitted && (
-              <div className="mb-6 p-4 rounded-md bg-green-50 border border-green-200 text-green-800 flex gap-3">
-                <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />
-                <div>{t("enquirySuccess")}</div>
+              <div className="mb-6 p-4 rounded-md bg-accent border border-secondary/30 text-accent-foreground flex gap-3">
+                <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5 text-secondary" />
+                <div className="font-medium">{t("enquirySuccess")}</div>
               </div>
             )}
 
