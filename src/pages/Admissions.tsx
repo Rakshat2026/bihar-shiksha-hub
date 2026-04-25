@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoginDialog } from "@/components/layout/LoginDialog";
 import { toast } from "sonner";
 import { Loader2, Send, Lock, CheckCircle2 } from "lucide-react";
+import { friendlyAuthError } from "@/lib/errors";
 
 const enquirySchema = z.object({
   class_applied: z.string().min(1, "Class is required"),
@@ -57,8 +58,7 @@ const Admissions = () => {
       setMessage("");
       toast.success(t("enquirySuccess"));
     } catch (err) {
-      const m = err instanceof Error ? err.message : "Failed to submit";
-      toast.error(m);
+      toast.error(friendlyAuthError(err, "Could not submit your enquiry. Please try again."));
     } finally {
       setLoading(false);
     }
