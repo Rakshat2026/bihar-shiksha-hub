@@ -9,8 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Phone, KeyRound, UserPlus, Loader2, Info } from "lucide-react";
-
-const MOCK_OTP = "123456";
+import { friendlyAuthError } from "@/lib/errors";
 
 type Step = "mobile" | "otp" | "profile";
 
@@ -28,6 +27,9 @@ export function LoginDialog({ open, onOpenChange }: Props) {
   const [name, setName] = useState("");
   const [role, setRole] = useState<"student" | "parent">("student");
   const [loading, setLoading] = useState(false);
+  // Only populated in mock-OTP mode (no SMS provider configured) so the user
+  // can actually log in during the prototype phase. In production this stays empty.
+  const [devCode, setDevCode] = useState<string | null>(null);
 
   const reset = () => {
     setStep("mobile");
@@ -36,6 +38,7 @@ export function LoginDialog({ open, onOpenChange }: Props) {
     setName("");
     setRole("student");
     setLoading(false);
+    setDevCode(null);
   };
 
   const handleClose = (v: boolean) => {
@@ -43,7 +46,7 @@ export function LoginDialog({ open, onOpenChange }: Props) {
     onOpenChange(v);
   };
 
-  const handleSendOtp = (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleaned = mobile.replace(/\D/g, "");
     if (cleaned.length !== 10) {
@@ -51,47 +54,51 @@ export function LoginDialog({ open, onOpenChange }: Props) {
       return;
     }
     setMobile(cleaned);
-    setStep("otp");
-    toast.success(t("mockOtpHint"));
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("auth-otp", {
+        body: { action: "request", mobile: cleaned },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setDevCode(typeof data?.dev_code === "string" ? data.dev_code : null);
+      setStep("otp");
+      toast.success(t("mockOtpHint"));
+    } catch (err) {
+      toast.error(friendlyAuthError(err, "Could not send code. Please try again."));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp !== MOCK_OTP) {
+    if (!/^[0-9]{6}$/.test(otp)) {
       toast.error(t("invalidOtp"));
       return;
     }
     setLoading(true);
     try {
-      // Check if profile exists for this mobile -> existing user
-      const { data: existing } = await supabase
-        .from("profiles")
-        .select("user_id, name")
-        .eq("mobile_number", mobile)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("auth-otp", {
+        body: { action: "verify", mobile, code: otp },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      const synthEmail = `m${mobile}@gyangangaacademy.local`;
-      const password = `gga_${mobile}_otp_secret_v1`;
+      const { email, password, isNew } = data as { email: string; password: string; isNew: boolean };
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr) throw signInErr;
 
-      if (existing) {
-        const { error } = await supabase.auth.signInWithPassword({ email: synthEmail, password });
-        if (error) throw error;
+      if (isNew) {
+        // New account — collect profile details before closing.
+        setStep("profile");
+      } else {
         toast.success(t("welcomeBack"));
         await refreshProfile();
         handleClose(false);
-      } else {
-        // New user — create account, then collect profile
-        const { error } = await supabase.auth.signUp({
-          email: synthEmail,
-          password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
-        });
-        if (error) throw error;
-        setStep("profile");
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
-      toast.error(msg);
+      toast.error(friendlyAuthError(err, "Verification failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -120,8 +127,7 @@ export function LoginDialog({ open, onOpenChange }: Props) {
       await refreshProfile();
       handleClose(false);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not save profile";
-      toast.error(msg);
+      toast.error(friendlyAuthError(err, "Could not save profile. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -153,8 +159,9 @@ export function LoginDialog({ open, onOpenChange }: Props) {
                 />
               </div>
             </div>
-            <Button type="submit" variant="royal" className="w-full" size="lg">
-              <Phone className="h-4 w-4" /> {t("sendOtp")}
+            <Button type="submit" variant="royal" className="w-full" size="lg" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Phone className="h-4 w-4" />}
+              {t("sendOtp")}
             </Button>
           </form>
         )}
@@ -166,6 +173,11 @@ export function LoginDialog({ open, onOpenChange }: Props) {
               <div>
                 <strong>{t("mockOtpHint")}</strong>
                 <div className="text-xs opacity-80 mt-0.5">+91 {mobile}</div>
+                {devCode && (
+                  <div className="text-xs mt-1">
+                    Demo code: <span className="font-mono font-bold tracking-widest">{devCode}</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -177,7 +189,7 @@ export function LoginDialog({ open, onOpenChange }: Props) {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                placeholder="123456"
+                placeholder="••••••"
                 className="text-center text-lg tracking-widest"
                 required
               />
