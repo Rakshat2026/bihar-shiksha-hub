@@ -32,7 +32,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm">
             <li className="flex gap-2"><MapPin className="h-4 w-4 mt-0.5 shrink-0" /><span>{t("addressFull")}</span></li>
             <li className="flex gap-2"><Phone className="h-4 w-4 mt-0.5 shrink-0" /><span>+91 99319 14858</span></li>
-            <li className="flex gap-2"><Mail className="h-4 w-4 mt-0.5 shrink-0" /><span>info@gyangangaacademy.in</span></li>
+            <li className="flex gap-2"><Mail className="h-4 w-4 mt-0.5 shrink-0" /><span>gyangangatektar@gmail.com</span></li>
             <li className="flex gap-2"><Clock className="h-4 w-4 mt-0.5 shrink-0" /><span>{t("hoursVal")}</span></li>
           </ul>
         </div>
