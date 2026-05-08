@@ -15,10 +15,11 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-// Mock-OTP mode: when true, the OTP value is returned in the response so the
-// frontend can display it (no SMS provider configured). Set to "false" once
-// real SMS delivery is wired up.
-const MOCK_OTP_MODE = (Deno.env.get("MOCK_OTP_MODE") ?? "true") === "true";
+// Mock-OTP mode: when explicitly enabled, the OTP value is returned in the
+// response so the frontend can display it (no SMS provider configured).
+// Defaults to FALSE so production is safe even if the secret is missing.
+// To re-enable for prototype/demo, set the MOCK_OTP_MODE secret to "true".
+const MOCK_OTP_MODE = Deno.env.get("MOCK_OTP_MODE") === "true";
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { autoRefreshToken: false, persistSession: false },
