@@ -14,16 +14,16 @@ export function Navbar() {
   const [loginOpen, setLoginOpen] = useState(false);
   const loc = useLocation();
 
-  const links: { to: string; key: Parameters<typeof t>[0] }[] = [
+  const links: { to: string; key: Parameters<typeof t>[0]; auth?: boolean }[] = [
     { to: "/", key: "navHome" },
     { to: "/about", key: "navAbout" },
     { to: "/academics", key: "navAcademics" },
     { to: "/admissions", key: "navAdmissions" },
     { to: "/facilities", key: "navFacilities" },
     { to: "/gallery", key: "navGallery" },
-    { to: "/notices", key: "navNotices" },
+    { to: "/portfolio", key: "navPortfolio", auth: true },
     { to: "/contact", key: "navContact" },
-  ];
+  ].filter((l) => !l.auth || !!profile) as typeof links;
 
   return (
     <>
