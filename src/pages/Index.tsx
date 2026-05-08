@@ -82,7 +82,7 @@ const Index = () => {
       <section className="gradient-royal text-primary-foreground">
         <div className="container px-4 py-12 md:py-16 text-center">
           <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            {t("ctaAdmission")} 2025-26
+            {t("ctaAdmission")} 2026-27
           </h2>
           <p className="text-primary-foreground/90 mb-6 max-w-xl mx-auto">
             {t("admissionIntro")}
