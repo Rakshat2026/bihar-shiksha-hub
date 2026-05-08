@@ -68,8 +68,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Poppins', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],
-        hindi: ['"Noto Sans Devanagari"', 'Poppins', 'sans-serif'],
+        sans: ['Inter', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],
+        display: ['Poppins', 'Noto Sans Devanagari', 'sans-serif'],
+        hindi: ['"Noto Sans Devanagari"', 'Inter', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {
