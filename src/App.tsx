@@ -14,6 +14,7 @@ import Facilities from "./pages/Facilities";
 import Gallery from "./pages/Gallery";
 import Notices from "./pages/Notices";
 import Contact from "./pages/Contact";
+import Portfolio from "./pages/Portfolio";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
