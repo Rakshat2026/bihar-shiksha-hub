@@ -13,7 +13,7 @@ import { GraduationCap, Calendar, Trophy, BookOpen, User, History, LogIn, Loader
 import { Link } from "react-router-dom";
 
 interface Attendance { id: string; date: string; status: string; notes: string | null; }
-interface Result { id: string; term: string; subject: string; marks: number; max_marks: number; grade: string | null; }
+interface Result { id: string; term: string; subject: string; marks: number; max_marks: number; grade: string | null; created_at: string; }
 interface Homework { id: string; title: string; subject: string; description: string | null; due_date: string | null; created_at: string; }
 
 const Portfolio = () => {
