@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          marked_by: string | null
+          notes: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          marked_by?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          marked_by?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+        }
+        Relationships: []
+      }
       enquiries: {
         Row: {
           class_applied: string
@@ -47,26 +109,68 @@ export type Database = {
         }
         Relationships: []
       }
+      homework: {
+        Row: {
+          class: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          posted_by: string | null
+          section: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          class: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          posted_by?: string | null
+          section: string
+          subject: string
+          title: string
+        }
+        Update: {
+          class?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          posted_by?: string | null
+          section?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
       notices: {
         Row: {
+          audience: Database["public"]["Enums"]["notice_audience"]
           created_at: string
           description: string
           id: string
           notice_date: string
+          posted_by: string | null
           title: string
         }
         Insert: {
+          audience?: Database["public"]["Enums"]["notice_audience"]
           created_at?: string
           description: string
           id?: string
           notice_date?: string
+          posted_by?: string | null
           title: string
         }
         Update: {
+          audience?: Database["public"]["Enums"]["notice_audience"]
           created_at?: string
           description?: string
           id?: string
           notice_date?: string
+          posted_by?: string | null
           title?: string
         }
         Relationships: []
@@ -101,6 +205,38 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_links: {
+        Row: {
+          created_at: string
+          id: string
+          parent_user_id: string
+          relation: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          parent_user_id: string
+          relation?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          parent_user_id?: string
+          relation?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_links_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -131,15 +267,190 @@ export type Database = {
         }
         Relationships: []
       }
+      results: {
+        Row: {
+          created_at: string
+          grade: string | null
+          id: string
+          marks: number
+          max_marks: number
+          recorded_by: string | null
+          remarks: string | null
+          student_id: string
+          subject: string
+          term: string
+        }
+        Insert: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          marks: number
+          max_marks?: number
+          recorded_by?: string | null
+          remarks?: string | null
+          student_id: string
+          subject: string
+          term: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string | null
+          id?: string
+          marks?: number
+          max_marks?: number
+          recorded_by?: string | null
+          remarks?: string | null
+          student_id?: string
+          subject?: string
+          term?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "results_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff: {
+        Row: {
+          assigned_class: string | null
+          assigned_section: string | null
+          created_at: string
+          department: string | null
+          email: string
+          id: string
+          name: string
+          sub_role: Database["public"]["Enums"]["staff_sub_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_class?: string | null
+          assigned_section?: string | null
+          created_at?: string
+          department?: string | null
+          email: string
+          id?: string
+          name: string
+          sub_role?: Database["public"]["Enums"]["staff_sub_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_class?: string | null
+          assigned_section?: string | null
+          created_at?: string
+          department?: string | null
+          email?: string
+          id?: string
+          name?: string
+          sub_role?: Database["public"]["Enums"]["staff_sub_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          class: string
+          created_at: string
+          created_by: string | null
+          dob: string | null
+          id: string
+          mobile_number: string | null
+          name: string
+          parent_mobile: string | null
+          roll_no: string | null
+          section: string
+          student_uid: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          class: string
+          created_at?: string
+          created_by?: string | null
+          dob?: string | null
+          id?: string
+          mobile_number?: string | null
+          name: string
+          parent_mobile?: string | null
+          roll_no?: string | null
+          section?: string
+          student_uid?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          class?: string
+          created_at?: string
+          created_by?: string | null
+          dob?: string | null
+          id?: string
+          mobile_number?: string | null
+          name?: string
+          parent_mobile?: string | null
+          roll_no?: string | null
+          section?: string
+          student_uid?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       cleanup_expired_otps: { Args: never; Returns: undefined }
+      generate_student_uid: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_parent_of: {
+        Args: { _student_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_staff_lead: { Args: { _user_id: string }; Returns: boolean }
+      staff_handles_student: {
+        Args: { _student_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "parent" | "staff"
+      attendance_status: "present" | "absent" | "late"
+      notice_audience: "public" | "staff"
+      staff_sub_role: "teacher" | "hod" | "head"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -266,6 +577,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "parent", "staff"],
+      attendance_status: ["present", "absent", "late"],
+      notice_audience: ["public", "staff"],
+      staff_sub_role: ["teacher", "hod", "head"],
+    },
   },
 } as const
