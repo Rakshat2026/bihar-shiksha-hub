@@ -1,143 +1,141 @@
 import { useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Globe, LogOut, User as UserIcon } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Menu, X, Globe, GraduationCap, ShieldCheck, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useI18n } from "@/contexts/I18nContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { LoginDialog } from "./LoginDialog";
 import logo from "@/assets/logo.png";
 
 export function Navbar() {
   const { t, lang, setLang } = useI18n();
-  const { profile, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const loc = useLocation();
 
-  const links: { to: string; key: Parameters<typeof t>[0]; auth?: boolean }[] = [
+  const links: { to: string; key: Parameters<typeof t>[0] }[] = [
     { to: "/", key: "navHome" },
     { to: "/about", key: "navAbout" },
     { to: "/academics", key: "navAcademics" },
     { to: "/admissions", key: "navAdmissions" },
     { to: "/facilities", key: "navFacilities" },
     { to: "/gallery", key: "navGallery" },
-    { to: "/portfolio", key: "navPortfolio", auth: true },
+    { to: "/notices", key: "navNotices" },
     { to: "/contact", key: "navContact" },
-  ].filter((l) => !l.auth || !!profile) as typeof links;
+  ];
 
   return (
-    <>
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="container flex h-16 items-center justify-between gap-4 px-4">
-          <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setMobileOpen(false)}>
-            <img src={logo} alt="Gyan Ganga Academy logo" width={40} height={40} className="h-10 w-10 object-contain" />
-            <div className="hidden sm:block leading-tight">
-              <div className="font-bold text-primary text-base">{t("schoolName")}</div>
-              <div className="text-[10px] text-muted-foreground">{t("schoolLocation")}</div>
-            </div>
-          </Link>
+    <motion.header
+      initial={{ y: -16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.4 }}
+      className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl"
+    >
+      <div className="container flex h-16 items-center justify-between gap-4 px-4">
+        <Link to="/" className="flex items-center gap-2 shrink-0" onClick={() => setMobileOpen(false)}>
+          <img src={logo} alt="Gyan Ganga Academy logo" width={40} height={40} className="h-10 w-10 object-contain" />
+          <div className="hidden sm:block leading-tight">
+            <div className="font-bold text-primary text-base">{t("schoolName")}</div>
+            <div className="text-[10px] text-muted-foreground">{t("schoolLocation")}</div>
+          </div>
+        </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-1">
+          {links.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              end={l.to === "/"}
+              className={({ isActive }) =>
+                `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  isActive ? "text-secondary bg-accent" : "text-foreground/80 hover:text-primary hover:bg-muted"
+                }`
+              }
+            >
+              {t(l.key)}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLang(lang === "hi" ? "en" : "hi")}
+            className="hidden sm:flex items-center gap-1 px-3 py-2 text-xs font-medium rounded-md border border-border hover:bg-muted transition-colors"
+            aria-label="Toggle language"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            <span>{lang === "hi" ? "EN" : "हिं"}</span>
+          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="hidden sm:inline-flex gradient-royal text-primary-foreground hover:opacity-95">
+                Portal Login <ChevronDown className="h-4 w-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild>
+                <Link to="/connect/login" className="flex items-center gap-2 cursor-pointer">
+                  <GraduationCap className="h-4 w-4 text-tertiary" />
+                  <div>
+                    <div className="font-medium">Student Connect</div>
+                    <div className="text-xs text-muted-foreground">Students & parents</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/staff/login" className="flex items-center gap-2 cursor-pointer">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <div>
+                    <div className="font-medium">Staff Portal</div>
+                    <div className="text-xs text-muted-foreground">Teachers, HOD, Head</div>
+                  </div>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <button
+            className="lg:hidden p-2 rounded-md hover:bg-muted"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+          className="lg:hidden border-t border-border bg-background">
+          <nav className="container px-4 py-3 flex flex-col gap-1">
             {links.map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
+                end={l.to === "/"}
+                onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive ? "text-secondary bg-accent" : "text-foreground hover:text-primary hover:bg-muted"
+                  `px-3 py-2.5 text-base font-medium rounded-md transition-colors ${
+                    isActive ? "text-secondary bg-accent" : "text-foreground hover:bg-muted"
                   }`
                 }
               >
                 {t(l.key)}
               </NavLink>
             ))}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLang(lang === "hi" ? "en" : "hi")}
-              className="hidden sm:flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md border border-border hover:bg-muted transition-colors"
-              aria-label="Toggle language"
-            >
-              <Globe className="h-4 w-4" />
-              <span>{lang === "hi" ? "English" : "हिंदी"}</span>
-            </button>
-
-            {profile ? (
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-sm font-medium text-primary flex items-center gap-1">
-                  <UserIcon className="h-4 w-4" /> {profile.name.split(" ")[0]}
-                </span>
-                <Button variant="ghost" size="sm" onClick={signOut} aria-label="logout">
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button variant="royal" size="sm" className="hidden sm:inline-flex" onClick={() => setLoginOpen(true)}>
-                {t("login")}
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t">
+              <Button asChild variant="outline" size="sm" onClick={() => setMobileOpen(false)}>
+                <Link to="/connect/login"><GraduationCap className="h-4 w-4 mr-1" /> Student</Link>
               </Button>
-            )}
-
-            <button
-              className="lg:hidden p-2 rounded-md hover:bg-muted"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {mobileOpen && (
-          <div className="lg:hidden border-t border-border bg-background animate-fade-in">
-            <nav className="container px-4 py-3 flex flex-col gap-1">
-              {links.map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={({ isActive }) =>
-                    `px-3 py-2.5 text-base font-medium rounded-md transition-colors ${
-                      isActive ? "text-secondary bg-accent" : "text-foreground hover:bg-muted"
-                    }`
-                  }
-                >
-                  {t(l.key)}
-                </NavLink>
-              ))}
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => setLang(lang === "hi" ? "en" : "hi")}
-                >
-                  <Globe className="h-4 w-4 mr-1" />
-                  {lang === "hi" ? "English" : "हिंदी"}
-                </Button>
-                {profile ? (
-                  <Button variant="outline" size="sm" className="flex-1" onClick={signOut}>
-                    <LogOut className="h-4 w-4 mr-1" /> {t("logout")}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="royal"
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => {
-                      setMobileOpen(false);
-                      setLoginOpen(true);
-                    }}
-                  >
-                    {t("login")}
-                  </Button>
-                )}
-              </div>
-            </nav>
-          </div>
-        )}
-      </header>
-      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-    </>
+              <Button asChild size="sm" className="gradient-royal text-primary-foreground" onClick={() => setMobileOpen(false)}>
+                <Link to="/staff/login"><ShieldCheck className="h-4 w-4 mr-1" /> Staff</Link>
+              </Button>
+              <Button variant="outline" size="sm" className="col-span-2" onClick={() => setLang(lang === "hi" ? "en" : "hi")}>
+                <Globe className="h-4 w-4 mr-1" />{lang === "hi" ? "English" : "हिंदी"}
+              </Button>
+            </div>
+          </nav>
+        </motion.div>
+      )}
+    </motion.header>
   );
 }
