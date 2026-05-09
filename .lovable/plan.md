@@ -1,117 +1,124 @@
+## Bihar Shiksha Hub — Premium ERP Transformation
 
-# Bihar Shiksha Hub — Full Overhaul Plan
-
-## 1. Roles & Identity Model
-
-Three login types — selected on the login dialog before credentials:
-
-- **Student** — logs in with **mobile + OTP** (Twilio SMS), gets a unique **Student ID** (e.g. `GGA-2026-00042`) auto-issued on first profile save.
-- **Parent** — logs in with **email + OTP** (Lovable auth email) and links to one or more student IDs.
-- **Staff** — logs in with **email + password**, with a sub-role: `teacher`, `hod`, or `head`. Class/section is assigned per teacher.
-
-All three flows protected by **Cloudflare Turnstile** CAPTCHA.
-**Google login** available on every tab as a one-tap alternative; first-time Google users are prompted to choose role + complete profile.
-
-### Database changes (one migration)
-
-Schema-only — no seed data, since teachers will populate everything.
-
-- `app_role` enum: `student | parent | staff`
-- `staff_sub_role` enum: `teacher | hod | head`
-- `user_roles` table — `(user_id, role)`, RLS, security-definer `has_role()` helper
-- `students` table — `student_uid` (unique, auto-generated), `user_id`, `name`, `class`, `section`, `roll_no`, `dob`, `mobile_number`
-- `staff` table — `user_id`, `name`, `email`, `sub_role`, `assigned_class`, `assigned_section`, `department`
-- `parent_links` table — `parent_user_id`, `student_id`
-- `attendance` — `student_id`, `date`, `status` (present/absent/late), `marked_by`
-- `results` — `student_id`, `term`, `subject`, `marks`, `max_marks`, `grade`
-- `homework` — `class`, `section`, `subject`, `title`, `description`, `due_date`, `posted_by`
-- `complaints` — `message`, `category`, `created_at` (no user info, fully anonymous)
-- Add `posted_by` + `audience` to `notices`; tighten RLS so only Head/HOD can insert
-- RLS everywhere: students see own data, parents see linked students' data, staff see their assigned class/section, head/HOD see all
-
-### Edge functions
-
-- `auth-otp` (existing) — extend to support **`channel: "sms" | "email"`**; SMS branch calls Twilio gateway, email branch sends 6-digit code via Lovable auth email template
-- `verify-turnstile` — server-side validates Turnstile token before issuing OTPs or accepting signups
-- `student-uid` — DB trigger/function generates `GGA-{year}-{sequence}` on student row insert
-
-### Secrets needed
-
-- `TURNSTILE_SECRET_KEY` (server) + Turnstile site key (public, in `.env`)
-- Twilio: connector — needs `From` number; user must connect via picker
-- Google OAuth: managed by Lovable Cloud (no setup required)
-
-## 2. Academic Year
-
-Find/replace `2025-26` → `2026-27` and `2025-2026` → `2026-2027` across pages, hero CTA strip, admissions, and i18n strings (Hindi + English).
-
-## 3. Student Portfolio & "Student Connect"
-
-New `/portfolio` route, gated by login.
-
-- **Student view**: header card with avatar, name, **Student UID**, class/section. Tabs: Attendance / Results / Homework / Profile.
-- **"Student Connect" button** opens a full-history sheet with timeline of all records.
-- **Parent view**: same layout with a switcher if multiple linked children.
-
-## 4. Staff Dashboard (no backend code edits required to update data)
-
-New `/staff` route, gated by Staff role.
-
-- **Class roster**: lists students of teacher's assigned class/section
-- **Mark Attendance**: date picker → grid of students with present/absent/late toggles → save
-- **Enter Results**: term selector → subject grid → marks input
-- **Post Homework**: title, subject, description, due date → posts to assigned class
-- **Notice Board (Head/HOD only)**: post school-wide notices; teachers see read-only
-
-All forms use existing shadcn components + Zod validation; data writes go directly to RLS-protected tables via Supabase client.
-
-## 5. Reach Us / Complaint
-
-- Rename `Contact` page heading + nav label to **"Reach Us / Complaint"**
-- Remove name + mobile fields; keep only **category** dropdown + **message** textarea
-- Submit anonymously to `complaints` table (insert allowed for everyone, select restricted to Head/HOD)
-- Keep address/phone/map info block as-is
-
-## 6. Homepage Redesign
-
-- **New palette**: keep saffron accent, shift primary to a deeper teal/indigo blend; add soft warm gradient backgrounds, glass-morph cards
-- **Fonts**: switch headings to **Poppins**, body to **Inter** (loaded via Google Fonts in `index.html`)
-- **New sections**: animated stat counters (students, teachers, years), testimonial carousel (placeholder text), quick-links grid, faculty highlights, "Apply for 2026-27" pulse CTA
-- All tokens added to `index.css` + `tailwind.config.ts` — no hard-coded colors
-
-## 7. Notice Board Access Control
-
-- Notices page no longer linked from public nav — moved under Staff dashboard
-- RLS:
-  - SELECT: any authenticated staff
-  - INSERT/UPDATE/DELETE: only `head` or `hod` (checked via `has_role` + `staff.sub_role`)
-- Public homepage shows only the 3 most recent **`audience='public'`** notices in a teaser strip
+This is a large redesign + restructure. Below is the plan for one big pass. Please confirm a few choices before I start (questions at the end).
 
 ---
 
-## Execution order
+### 1. Information architecture (new routes)
 
-1. Migration: enums, role tables, student/staff/parent_links/attendance/results/homework/complaints, RLS, helpers, student UID generator
-2. Add Turnstile + Twilio secrets, deploy `verify-turnstile` and updated `auth-otp` edge functions
-3. Rebuild `LoginDialog` with role tabs + channel switching + Google + Turnstile
-4. Auth context: load role + staff/student profile
-5. New routes: `/portfolio`, `/staff`, refactor `/notices` behind staff
-6. Rebuild `Contact` → `Reach Us / Complaint`
-7. Redesign homepage + design tokens + fonts
-8. Academic year string sweep
-9. i18n updates (Hindi + English) for all new copy
-10. Run security scan, fix findings
+```
+Public site
+  /                    Home (redesigned, premium)
+  /about, /academics, /facilities, /gallery, /notices  (restyled)
+  /admissions          Admission enquiry (no login)
+  /contact             Reach Us / Complaint (kept)
 
-## Things I will NOT do (out of scope unless you ask)
+Portals (separate entry points, separate UIs)
+  /staff/login         Staff Login (no signup, forgot password)
+  /staff               Staff dashboard (role-aware: teacher / hod / head / admin)
+  /connect/login       Student Connect login (no signup, forgot password)
+  /connect             Student/Parent dashboard
+  /admin               Admin console (head role only)
+```
 
-- File uploads (avatars, certificates) — can add later with storage buckets
-- Payment / fee tracking
-- Push notifications / SMS reminders to parents
-- Bulk import (CSV upload of students) — staff add students manually for now
+The current `/portfolio` becomes `/connect`. The mixed student/parent signup in `LoginDialog` is removed.
 
-## Secrets you'll be asked to add
+---
 
-- `TURNSTILE_SECRET_KEY` and `VITE_TURNSTILE_SITE_KEY` (from Cloudflare → Turnstile)
-- Twilio connection (via the connector picker — I'll trigger it)
+### 2. Admission Enquiry (no accounts)
 
-Approve and I'll execute the whole sequence.
+- Public form at `/admissions`, no auth required.
+- Fields: student name, parent/guardian name, mobile, email, address, class applying for, previous school, message.
+- Stored in `enquiries` table (extend with the new columns).
+- RLS: anonymous INSERT allowed (rate-limited via Turnstile token check); only lead staff / admin can SELECT.
+- Success confirmation card after submit.
+
+### 3. Staff Login Portal
+
+- Dedicated `/staff/login` page (no "create account", no tabs).
+- Email + password (staff `email` already exists).
+- Forgot password → `supabase.auth.resetPasswordForEmail` → `/staff/reset-password`.
+- **Removes the self-insert `staff` policy entirely** (fixes the open privilege-escalation finding). Staff records only created by admin/head.
+- Staff dashboard sections: My Class roster, Attendance, Homework, Results, Notices (HOD/Head only for posting).
+
+### 4. Student Connect Portal
+
+- `/connect/login`: Student UID + password OR Parent email + password.
+- **No self-signup.** Admin issues credentials.
+- Forgot password via OTP (email for parents; mobile OTP via existing `auth-otp` edge function for students).
+- Dashboard tabs: Attendance, Homework, Notices, Results, Analytics (recharts), Teacher Remarks, Fee Status, Timetable.
+- Fee + timetable are new tables (fees, timetable_slots).
+
+### 5. Admin Console (`/admin`, head role only)
+
+- Create/disable staff accounts (calls an edge function using service role to create auth user + staff row + user_role).
+- Create/disable student & parent accounts (same pattern, generates UID + temp password).
+- Review admission enquiries (list, mark contacted).
+- Manage notices.
+
+### 6. Auth model changes
+
+- Add `app_role = 'admin'` enum value (head implicitly admin, or a dedicated admin role).
+- New edge function `admin-provision` (service role) for creating staff / student / parent users — only callable by head.
+- Drop self-insert/update on `staff` (security finding fix).
+- Disable public signup paths in UI; keep `supabase.auth.signUp` server-side only via edge function.
+
+### 7. Visual redesign
+
+New token palette in `index.css` + `tailwind.config.ts`:
+
+```text
+--background : warm ivory       (40 30% 98%)
+--foreground : slate charcoal   (220 25% 14%)
+--primary    : deep navy        (220 60% 18%)
+--secondary  : muted gold       (42 65% 52%)
+--tertiary   : elegant emerald  (165 45% 35%)
+--accent     : soft teal tint   (180 30% 94%)
+```
+
+- Fonts: **Fraunces** (display) + **Inter** (body) + **Noto Sans Devanagari** (Hindi).
+- Replace saffron gradients with subtle navy→teal and ivory→gold washes.
+- Add `framer-motion` for page transitions, fade-up sections, animated counters, hover lifts.
+- Glass cards used sparingly on hero.
+- Mobile-first responsive grid; sticky translucent navbar with shrink-on-scroll.
+
+### 8. Component cleanup
+
+- Replace `LoginDialog` with two pages: `StaffLoginPage`, `ConnectLoginPage`.
+- New `PortalLayout` with sidebar (`shadcn/ui sidebar`) for `/staff`, `/connect`, `/admin`.
+- Public `Layout` keeps top navbar + footer, gets restyled.
+- Add `ProtectedRoute` wrapper that checks role + redirects to the correct login.
+
+---
+
+### Technical section
+
+- DB migrations:
+  1. Drop `Staff insert own record` + `Staff update own record` policies (security fix).
+  2. Add `app_role = 'admin'` enum value and an admin RLS helper.
+  3. Extend `enquiries` with `parent_name`, `email`, `address`, `previous_school`, `status`; allow anon INSERT + admin SELECT/UPDATE.
+  4. New tables: `fees(student_id, term, amount, paid, due_date)`, `timetable_slots(class, section, day, period, subject, teacher_id)`, `teacher_remarks(student_id, term, remark, by)`.
+  5. Realtime publication for `notices`, `homework`.
+- Edge function `admin-provision` (service role): create auth user, insert into `staff`/`students`/`profiles`, assign `user_roles`. JWT-verified, head-only.
+- `framer-motion` added; `recharts` already present (used in Portfolio).
+- `react-hook-form` + `zod` for all forms.
+- All new routes lazy-loaded with `React.lazy` for performance.
+
+---
+
+### Out of scope for this pass (flag for later)
+
+- Twilio SMS / paid OTP — keep current free email OTP + mock mobile OTP.
+- Online fee payments — fees are read-only status display.
+- Push notifications.
+
+---
+
+### Quick confirmations needed
+
+1. **Admin role** — should the existing `head` sub_role act as admin, or do you want a separate dedicated `admin` account?
+2. **Student Connect login identifier** — Student UID (`GGA-2026-0001`) + password, or mobile + OTP only?
+3. **Should I keep Hindi/English bilingual support across the new portals?** (adds work but consistent.)
+4. **Forgot-password delivery for students** — email OTP only (free, reliable) or mobile OTP via the existing mock flow?
+
+Reply with answers (or "your call on all") and I'll execute the full pass.
