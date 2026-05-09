@@ -78,34 +78,88 @@ export type Database = {
       }
       enquiries: {
         Row: {
+          address: string | null
           class_applied: string
           created_at: string
+          email: string | null
           id: string
           message: string | null
           mobile_number: string
           name: string
+          parent_name: string | null
+          previous_school: string | null
           role: string
-          user_id: string
+          status: string
+          user_id: string | null
         }
         Insert: {
+          address?: string | null
           class_applied: string
           created_at?: string
+          email?: string | null
           id?: string
           message?: string | null
           mobile_number: string
           name: string
+          parent_name?: string | null
+          previous_school?: string | null
           role: string
-          user_id: string
+          status?: string
+          user_id?: string | null
         }
         Update: {
+          address?: string | null
           class_applied?: string
           created_at?: string
+          email?: string | null
           id?: string
           message?: string | null
           mobile_number?: string
           name?: string
+          parent_name?: string | null
+          previous_school?: string | null
           role?: string
-          user_id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      fees: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          paid: boolean
+          paid_on: string | null
+          student_id: string
+          term: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          paid_on?: string | null
+          student_id: string
+          term: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          paid_on?: string | null
+          student_id?: string
+          term?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -401,6 +455,72 @@ export type Database = {
         }
         Relationships: []
       }
+      teacher_remarks: {
+        Row: {
+          by_staff: string | null
+          created_at: string
+          id: string
+          remark: string
+          student_id: string
+          term: string
+        }
+        Insert: {
+          by_staff?: string | null
+          created_at?: string
+          id?: string
+          remark: string
+          student_id: string
+          term: string
+        }
+        Update: {
+          by_staff?: string | null
+          created_at?: string
+          id?: string
+          remark?: string
+          student_id?: string
+          term?: string
+        }
+        Relationships: []
+      }
+      timetable_slots: {
+        Row: {
+          class: string
+          created_at: string
+          day_of_week: number
+          end_time: string | null
+          id: string
+          period: number
+          section: string
+          start_time: string | null
+          subject: string
+          teacher_id: string | null
+        }
+        Insert: {
+          class: string
+          created_at?: string
+          day_of_week: number
+          end_time?: string | null
+          id?: string
+          period: number
+          section: string
+          start_time?: string | null
+          subject: string
+          teacher_id?: string | null
+        }
+        Update: {
+          class?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string | null
+          id?: string
+          period?: number
+          section?: string
+          start_time?: string | null
+          subject?: string
+          teacher_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -436,6 +556,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_parent_of: {
         Args: { _student_id: string; _user_id: string }
         Returns: boolean
