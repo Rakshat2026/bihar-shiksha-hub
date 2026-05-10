@@ -3,6 +3,7 @@ import { ArrowRight, GraduationCap, BookOpen, Heart, IndianRupee } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/contexts/I18nContext";
+import { HomeSlideshow } from "@/components/HomeSlideshow";
 import hero from "@/assets/hero-school.jpg";
 
 const Index = () => {
