@@ -20,6 +20,27 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // Defaults to FALSE so production is safe even if the secret is missing.
 // To re-enable for prototype/demo, set the MOCK_OTP_MODE secret to "true".
 const MOCK_OTP_MODE = Deno.env.get("MOCK_OTP_MODE") === "true";
+const TURNSTILE_SECRET = Deno.env.get("TURNSTILE_SECRET_KEY");
+
+async function verifyTurnstile(token: string | undefined): Promise<boolean> {
+  if (!TURNSTILE_SECRET) return true; // Not configured -> skip (dev/setup mode)
+  if (!token || token === "DEV_BYPASS") return false;
+  try {
+    const resp = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: TURNSTILE_SECRET, response: token }),
+      },
+    );
+    const result = await resp.json();
+    return !!result.success;
+  } catch (e) {
+    console.error("turnstile verify failed", e);
+    return false;
+  }
+}
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { autoRefreshToken: false, persistSession: false },
