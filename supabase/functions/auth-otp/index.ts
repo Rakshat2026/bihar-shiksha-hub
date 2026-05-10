@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  let body: { action?: string; mobile?: string; code?: string };
+  let body: { action?: string; mobile?: string; code?: string; captchaToken?: string };
   try {
     body = await req.json();
   } catch {
