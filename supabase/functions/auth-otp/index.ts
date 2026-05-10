@@ -107,6 +107,11 @@ Deno.serve(async (req) => {
 
   try {
     if (action === "request") {
+      // Verify Cloudflare Turnstile token (skipped only when secret is unset)
+      const captchaOk = await verifyTurnstile(body.captchaToken);
+      if (!captchaOk) {
+        return json({ error: "CAPTCHA verification failed" }, 403);
+      }
       // Basic per-mobile rate limit: max 5 requests in last 10 minutes
       const since = new Date(Date.now() - 10 * 60_000).toISOString();
       const { count } = await admin
