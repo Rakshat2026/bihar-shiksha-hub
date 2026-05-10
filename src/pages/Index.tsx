@@ -58,6 +58,17 @@ const Index = () => {
         </div>
       </section>
 
+      {/* SLIDESHOW */}
+      <section className="container px-4 pt-12 md:pt-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-2">
+            {t("galleryHeading")}
+          </h2>
+          <div className="w-20 h-1 bg-secondary mx-auto rounded-full" />
+        </div>
+        <HomeSlideshow />
+      </section>
+
       {/* FEATURES */}
       <section className="container px-4 py-16 md:py-20">
         <div className="text-center mb-10">
