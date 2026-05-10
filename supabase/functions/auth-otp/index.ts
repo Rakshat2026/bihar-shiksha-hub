@@ -142,8 +142,9 @@ Deno.serve(async (req) => {
         return json({ error: "Could not send code" }, 500);
       }
 
-      // In real production this is where you'd call Twilio/MSG91.
-      console.log(`[auth-otp] OTP for ${mobile}: ${code} (expires ${expires_at})`);
+      // Never log the OTP code itself. Mask all but the last 4 digits of the mobile.
+      const masked = mobile.slice(-4).padStart(10, "*");
+      console.log(`[auth-otp] OTP issued for ${masked} (expires ${expires_at})`);
 
       return json({
         ok: true,
