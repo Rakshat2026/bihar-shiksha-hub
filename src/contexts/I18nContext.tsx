@@ -19,6 +19,8 @@ export const dict: Dict = {
   navGallery: { hi: "गैलरी", en: "Gallery" },
   navNotices: { hi: "सूचना पट", en: "Notice Board" },
   navContact: { hi: "हमसे संपर्क / शिकायत", en: "Reach Us / Complaint" },
+  navFaculty: { hi: "हमारे शिक्षक", en: "Faculty" },
+  navAlumni: { hi: "पूर्व विद्यार्थी", en: "Alumni" },
   navPortfolio: { hi: "विद्यार्थी पोर्टफोलियो", en: "Student Portfolio" },
   navStaff: { hi: "स्टाफ डैशबोर्ड", en: "Staff Dashboard" },
   login: { hi: "लॉगिन", en: "Login" },

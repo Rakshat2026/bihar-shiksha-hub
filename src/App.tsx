@@ -14,6 +14,8 @@ import Facilities from "./pages/Facilities";
 import Gallery from "./pages/Gallery";
 import Notices from "./pages/Notices";
 import Contact from "./pages/Contact";
+import Faculty from "./pages/Faculty";
+import Alumni from "./pages/Alumni";
 import StaffLogin from "./pages/StaffLogin";
 import StaffDashboard from "./pages/StaffDashboard";
 import ConnectLogin from "./pages/ConnectLogin";
@@ -39,6 +41,8 @@ function AppShell() {
       <Route path="/facilities" element={<Facilities />} />
       <Route path="/gallery" element={<Gallery />} />
       <Route path="/notices" element={<Notices />} />
+      <Route path="/faculty" element={<Faculty />} />
+      <Route path="/alumni" element={<Alumni />} />
       <Route path="/contact" element={<Contact />} />
 
       <Route path="/staff/login" element={<StaffLogin />} />

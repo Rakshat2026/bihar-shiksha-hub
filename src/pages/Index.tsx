@@ -3,6 +3,7 @@ import { ArrowRight, GraduationCap, BookOpen, Heart, IndianRupee } from "lucide-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/contexts/I18nContext";
+import { HomeSlideshow } from "@/components/HomeSlideshow";
 import hero from "@/assets/hero-school.jpg";
 
 const Index = () => {
@@ -55,6 +56,17 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* SLIDESHOW */}
+      <section className="container px-4 pt-12 md:pt-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-primary mb-2">
+            {t("galleryHeading")}
+          </h2>
+          <div className="w-20 h-1 bg-secondary mx-auto rounded-full" />
+        </div>
+        <HomeSlideshow />
       </section>
 
       {/* FEATURES */}

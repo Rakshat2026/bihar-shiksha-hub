@@ -19,7 +19,9 @@ export function Navbar() {
     { to: "/academics", key: "navAcademics" },
     { to: "/admissions", key: "navAdmissions" },
     { to: "/facilities", key: "navFacilities" },
+    { to: "/faculty", key: "navFaculty" },
     { to: "/gallery", key: "navGallery" },
+    { to: "/alumni", key: "navAlumni" },
     { to: "/notices", key: "navNotices" },
     { to: "/contact", key: "navContact" },
   ];
