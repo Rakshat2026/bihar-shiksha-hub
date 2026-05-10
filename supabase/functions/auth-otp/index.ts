@@ -20,6 +20,27 @@ const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // Defaults to FALSE so production is safe even if the secret is missing.
 // To re-enable for prototype/demo, set the MOCK_OTP_MODE secret to "true".
 const MOCK_OTP_MODE = Deno.env.get("MOCK_OTP_MODE") === "true";
+const TURNSTILE_SECRET = Deno.env.get("TURNSTILE_SECRET_KEY");
+
+async function verifyTurnstile(token: string | undefined): Promise<boolean> {
+  if (!TURNSTILE_SECRET) return true; // Not configured -> skip (dev/setup mode)
+  if (!token || token === "DEV_BYPASS") return false;
+  try {
+    const resp = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: TURNSTILE_SECRET, response: token }),
+      },
+    );
+    const result = await resp.json();
+    return !!result.success;
+  } catch (e) {
+    console.error("turnstile verify failed", e);
+    return false;
+  }
+}
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -70,7 +91,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  let body: { action?: string; mobile?: string; code?: string };
+  let body: { action?: string; mobile?: string; code?: string; captchaToken?: string };
   try {
     body = await req.json();
   } catch {
@@ -86,6 +107,11 @@ Deno.serve(async (req) => {
 
   try {
     if (action === "request") {
+      // Verify Cloudflare Turnstile token (skipped only when secret is unset)
+      const captchaOk = await verifyTurnstile(body.captchaToken);
+      if (!captchaOk) {
+        return json({ error: "CAPTCHA verification failed" }, 403);
+      }
       // Basic per-mobile rate limit: max 5 requests in last 10 minutes
       const since = new Date(Date.now() - 10 * 60_000).toISOString();
       const { count } = await admin
@@ -116,8 +142,9 @@ Deno.serve(async (req) => {
         return json({ error: "Could not send code" }, 500);
       }
 
-      // In real production this is where you'd call Twilio/MSG91.
-      console.log(`[auth-otp] OTP for ${mobile}: ${code} (expires ${expires_at})`);
+      // Never log the OTP code itself. Mask all but the last 4 digits of the mobile.
+      const masked = mobile.slice(-4).padStart(10, "*");
+      console.log(`[auth-otp] OTP issued for ${masked} (expires ${expires_at})`);
 
       return json({
         ok: true,
